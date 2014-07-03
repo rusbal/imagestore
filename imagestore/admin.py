@@ -3,7 +3,7 @@ from imagestore.models import Image, Album, AlbumUpload
 from sorl.thumbnail.admin import AdminInlineImageMixin
 from django.conf import settings
 
-from forms import ImageAdminForm
+from forms import AlbumAdminForm, ImageAdminForm
 
 
 class InlineImageAdmin(AdminInlineImageMixin, admin.TabularInline):
@@ -16,6 +16,8 @@ class AlbumAdmin(admin.ModelAdmin):
     list_display = ('name', 'admin_thumbnail', 'user', 'created', 'updated', 'is_public', 'order')
     list_editable = ('order', )
     inlines = [InlineImageAdmin]
+
+    form = AlbumAdminForm
 
 admin.site.register(Album, AlbumAdmin)
 

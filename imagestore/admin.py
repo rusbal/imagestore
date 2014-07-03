@@ -3,10 +3,12 @@ from imagestore.models import Image, Album, AlbumUpload
 from sorl.thumbnail.admin import AdminInlineImageMixin
 from django.conf import settings
 
+from forms import ImageAdminForm
+
+
 class InlineImageAdmin(AdminInlineImageMixin, admin.TabularInline):
     model = Image
-    fieldsets = ((None, {'fields': ['image', 'user', 'title', 'order', 'tags', 'album']}),)
-    raw_id_fields = ('user', )
+    fieldsets = ((None, {'fields': ['image', 'title', 'order', 'tags', 'album']}),)
     extra = 0
 
 class AlbumAdmin(admin.ModelAdmin):
@@ -18,10 +20,12 @@ class AlbumAdmin(admin.ModelAdmin):
 admin.site.register(Album, AlbumAdmin)
 
 class ImageAdmin(admin.ModelAdmin):
-    fieldsets = ((None, {'fields': ['user', 'title', 'image', 'description', 'order', 'tags', 'album']}),)
-    list_display = ('admin_thumbnail', 'user', 'order', 'album', 'title')
-    raw_id_fields = ('user', )
+    fieldsets = ((None, {'fields': ['album', 'image', 'title', 'description', 'order', 'tags']}),)
+    list_display = ('admin_thumbnail', 'title', 'album', 'user', 'order')
+    list_editable = ('order', )
     list_filter = ('album', )
+
+    form = ImageAdminForm
 
 class AlbumUploadAdmin(admin.ModelAdmin):
     def has_change_permission(self, request, obj=None):

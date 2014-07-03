@@ -78,3 +78,9 @@ class BaseAlbum(models.Model):
 
     admin_thumbnail.short_description = _('Head')
     admin_thumbnail.allow_tags = True
+
+    def name_with_owner(self):
+        full_name = self.user.get_full_name()
+        if not full_name:
+            full_name = self.user.username
+        return self.name + ' (' + full_name + ')'

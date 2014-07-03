@@ -40,3 +40,15 @@ class AlbumForm(forms.ModelForm):
             self.fields['head'].queryset = Image.objects.filter(album=kwargs['instance'])
         else:
             self.fields['head'].widget = forms.HiddenInput()
+
+
+class AlbumOwnerChoiceField(forms.ModelChoiceField):
+    def label_from_instance(self, obj):
+        return obj.name_with_owner()
+
+
+class ImageAdminForm(forms.ModelForm):
+
+    def __init__(self, *args, **kwargs):
+        super(ImageAdminForm, self).__init__(*args, **kwargs)
+        self.fields['album'] = AlbumOwnerChoiceField(queryset=Album.objects.all().order_by('user__first_name', 'name'))

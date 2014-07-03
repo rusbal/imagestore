@@ -54,6 +54,19 @@ class BaseImage(models.Model):
     updated = models.DateTimeField(_('Updated'), auto_now=True, null=True)
     album = models.ForeignKey(get_model_string('Album'), verbose_name=_('Album'), related_name='images')
 
+    __original_album = None
+
+    def __init__(self, *args, **kwargs):
+        super(BaseImage, self).__init__(*args, **kwargs)
+        if hasattr(self, 'album'):
+            self.__original_album = self.album
+
+    def save(self):
+        if self.album != self.__original_album:
+            self.user = self.album.user
+        super(BaseImage, self).save()
+        self.__original_album = self.album
+
     @permalink
     def get_absolute_url(self):
         return 'imagestore:image', (), {'pk': self.id}

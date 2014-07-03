@@ -37,6 +37,7 @@ class BaseAlbum(models.Model):
         permissions = (
             ('moderate_albums', 'View, update and delete any album'),
         )
+        unique_together = ('user', 'name')
 
     user = models.ForeignKey(User, verbose_name=_('Owner'), related_name='albums')
     name = models.CharField(_('Name'), max_length=100, blank=False, null=False)

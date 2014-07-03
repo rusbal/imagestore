@@ -38,7 +38,7 @@ class BaseAlbum(models.Model):
             ('moderate_albums', 'View, update and delete any album'),
         )
 
-    user = models.ForeignKey(User, verbose_name=_('User'), related_name='albums')
+    user = models.ForeignKey(User, verbose_name=_('Owner'), related_name='albums')
     name = models.CharField(_('Name'), max_length=100, blank=False, null=False)
     created = models.DateTimeField(_('Created'), auto_now_add=True)
     updated = models.DateTimeField(_('Updated'), auto_now=True)

@@ -9,8 +9,10 @@ except ImportError:
 __author__ = 'zeus'
 
 from django import forms
-from models import Image, Album
 from django.utils.translation import ugettext_lazy as _
+from django.contrib.auth.models import User
+
+from models import Image, Album
 
 
 class ImageForm(forms.ModelForm):
@@ -48,7 +50,19 @@ class AlbumOwnerChoiceField(forms.ModelChoiceField):
 
 
 class ImageAdminForm(forms.ModelForm):
-
     def __init__(self, *args, **kwargs):
         super(ImageAdminForm, self).__init__(*args, **kwargs)
-        self.fields['album'] = AlbumOwnerChoiceField(queryset=Album.objects.all().order_by('user__first_name', 'name'))
+        self.fields['album'] = AlbumOwnerChoiceField(
+            queryset=Album.objects.all().order_by('user__first_name', 'name'))
+
+
+class UserChoiceField(forms.ModelChoiceField):
+    def label_from_instance(self, obj):
+        return obj.get_full_name() or obj.username
+
+
+class AlbumAdminForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(AlbumAdminForm, self).__init__(*args, **kwargs)
+        self.fields['user'] = UserChoiceField(
+            queryset=User.objects.filter(is_active=True))

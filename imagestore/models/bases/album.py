@@ -80,7 +80,5 @@ class BaseAlbum(models.Model):
     admin_thumbnail.allow_tags = True
 
     def name_with_owner(self):
-        full_name = self.user.get_full_name()
-        if not full_name:
-            full_name = self.user.username
+        full_name = self.user.get_full_name() or self.user.username
         return self.name + ' (' + full_name + ')'

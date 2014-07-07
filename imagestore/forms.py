@@ -49,11 +49,51 @@ class AlbumOwnerChoiceField(forms.ModelChoiceField):
         return obj.name_with_owner()
 
 
+class AlbumOwnerMultipleChoiceField(forms.ModelMultipleChoiceField):
+    def label_from_instance(self, obj):
+        return obj.name_with_owner()
+
+
 class ImageAdminForm(forms.ModelForm):
+
+    class Meta:
+        model = Image
+
     def __init__(self, *args, **kwargs):
         super(ImageAdminForm, self).__init__(*args, **kwargs)
-        self.fields['album'] = AlbumOwnerChoiceField(
+        self.fields['albums'] = AlbumOwnerMultipleChoiceField(
             queryset=Album.objects.all().order_by('user__first_name', 'name'))
+
+    def assign_image_owner(self, obj):
+        messages = []
+        saved_user = None
+        for album in self.cleaned_data['albums']:
+            if saved_user is None:
+                obj.user = album.user
+                obj.save()
+                saved_user = album.user
+                messages.append({
+                    'type': 'success',
+                    'message': "%s (" + album.name + ") saved as owner of this work of art.",
+                    'name': album.user.get_full_name()
+                })
+            elif saved_user == album.user:
+                # Assigned to more than one Album owned by same User
+                messages.append({
+                    'type': 'success',
+                    'message': "%s (" + album.name + ") saved as owner of this work of art.",
+                    'name': album.user.get_full_name()
+                })
+            else:
+                # Attempt to assign to more than one Album owned by different
+                # User but this is not allowed since an Image can only be owned
+                # by one User.
+                messages.append({
+                    'type': 'warning',
+                    'message': "%s (" + album.name + ") wasn't saved as owner of this work of art.",
+                    'name': album.user.get_full_name()
+                })
+        return messages
 
 
 class ZipImageAdminForm(forms.ModelForm):

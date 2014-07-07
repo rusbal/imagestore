@@ -52,7 +52,7 @@ class BaseImage(models.Model):
     user = models.ForeignKey(User, verbose_name=_('Owner'), related_name='images')
     created = models.DateTimeField(_('Created'), auto_now_add=True, null=True)
     updated = models.DateTimeField(_('Updated'), auto_now=True, null=True)
-    album = models.ForeignKey(get_model_string('Album'), verbose_name=_('Album'), related_name='images')
+    albums = models.ManyToManyField(get_model_string('Album'), verbose_name=_('Album'), related_name='images')
 
     __original_album = None
 

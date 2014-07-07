@@ -31,7 +31,8 @@ def process_zipfile(uploaded_album):
             raise Exception('"%s" in the .zip archive is corrupt.' % bad_file)
 
         if not uploaded_album.album:
-            uploaded_album.album = Album.objects.create(name=uploaded_album.new_album_name)
+            uploaded_album.album = Album.objects.create(name=uploaded_album.new_album_name,
+                                                        user=uploaded_album.user)
 
         from cStringIO import StringIO
         for filename in sorted(zip.namelist()):
@@ -94,7 +95,7 @@ class AlbumUpload(models.Model):
         max_length=255,
         blank=True,
         verbose_name=_('New album name'),
-        help_text=_('If not empty new album with this name will be created and images will be upload to this album')
+        help_text=_('If not empty new album with this name will be created and images will be upload to this album<br><strong>You will be the automatic owner of this new album.</strong>')
         )
     tags = models.CharField(max_length=255, blank=True, verbose_name=_('tags'))
 

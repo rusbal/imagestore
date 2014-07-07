@@ -56,6 +56,14 @@ class ImageAdminForm(forms.ModelForm):
             queryset=Album.objects.all().order_by('user__first_name', 'name'))
 
 
+class ZipImageAdminForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(ZipImageAdminForm, self).__init__(*args, **kwargs)
+        self.fields['album'] = AlbumOwnerChoiceField(
+            queryset=Album.objects.all().order_by('user__first_name', 'name'))
+        self.fields['album'].required = False
+
+
 class UserChoiceField(forms.ModelChoiceField):
     def label_from_instance(self, obj):
         return obj.get_full_name() or obj.username

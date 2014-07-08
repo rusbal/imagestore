@@ -12,6 +12,8 @@ from django import forms
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth.models import User
 
+import zipfile
+
 from models import Image, Album
 
 
@@ -99,6 +101,13 @@ class ZipImageAdminForm(forms.ModelForm):
         self.fields['album'] = AlbumOwnerChoiceField(
             queryset=Album.objects.all().order_by('user__first_name', 'name'))
         self.fields['album'].required = False
+
+    def clean_zip_file(self):
+        data = self.cleaned_data
+        if not zipfile.is_zipfile(data['zip_file'].file):
+            raise forms.ValidationError("Please select a zip file.")
+        return data['zip_file']
+
 
 
 class UserChoiceField(forms.ModelChoiceField):

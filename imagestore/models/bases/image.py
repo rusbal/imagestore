@@ -48,7 +48,7 @@ class BaseImage(models.Model):
             ('moderate_images', 'View, update and delete any image'),
         )
 
-    title = models.CharField(_('Title'), max_length=100, blank=True, null=True)
+    title = models.CharField(_('Title'), max_length=100)
     description = models.TextField(_('Description'), blank=True, null=True)
     tags = TagField(_('Tags'), blank=True)
     order = models.IntegerField(_('Order'), default=0)
@@ -63,7 +63,7 @@ class BaseImage(models.Model):
         return 'imagestore:image', (), {'pk': self.id}
 
     def __unicode__(self):
-        return '%s'% self.id
+        return '%s' % self.title
 
     def admin_thumbnail(self):
         try:

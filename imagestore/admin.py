@@ -37,12 +37,13 @@ class ImageAdmin(admin.ModelAdmin):
             obj.title = reverse_slug(request.FILES['image'].name, remove_extension=True, title=True)
             print obj.title
 
-        """
-        Use owner of first album associated with this image to be the owner of this image
-        """
-        album_id = request.POST['albums'][0]
-        album = Album.objects.get(pk=album_id)
-        obj.user = album.user
+        if not change:
+            """
+            Use owner of first album associated with this image to be the owner of this image
+            """
+            album_id = request.POST['albums']
+            album = Album.objects.get(pk=album_id)
+            obj.user = album.user
         obj.save()
 
 

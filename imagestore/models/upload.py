@@ -18,6 +18,7 @@ except ImportError:
     from PIL import Image as PILImage
 
 from imagestore.models import Album, Image
+from imagestore.helpers.string import reverse_slug
 
 TEMP_DIR = getattr(settings, 'TEMP_DIR', 'temp/')
 
@@ -55,9 +56,12 @@ def process_zipfile(uploaded_album):
                     print 'seeked'
                     data.seek(0)
                 try:
-                    img = Image(album=uploaded_album.album)
+                    img = Image()
                     img.image.save(filename, ContentFile(data))
+                    img.user = uploaded_album.album.user
+                    img.title = reverse_slug(filename, remove_extension=True, title=True)
                     img.save()
+                    img.albums.add(uploaded_album.album)
                 except Exception, ex:
                     print('error create Image: %s' % ex.message)
         zip.close()

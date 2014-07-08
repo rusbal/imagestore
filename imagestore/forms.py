@@ -65,6 +65,7 @@ class ImageAdminForm(forms.ModelForm):
         super(ImageAdminForm, self).__init__(*args, **kwargs)
         self.fields['albums'] = AlbumOwnerMultipleChoiceField(
             queryset=Album.objects.all().order_by('user__first_name', 'name'))
+        self.fields['title'].required = False
 
     def clean_albums(self):
         msgs = []

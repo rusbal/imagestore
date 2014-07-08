@@ -20,27 +20,27 @@ class AlbumAdmin(admin.ModelAdmin):
 
 admin.site.register(Album, AlbumAdmin)
 
+
 class ImageAdmin(admin.ModelAdmin):
     form = ImageAdminForm
     fieldsets = ((None, {'fields': ['image', 'albums', 'title', 'description', 'order', 'tags']}),)
     list_display = ('admin_thumbnail', 'title', 'user', 'order')
     list_editable = ('order', )
-    list_filter = ('albums', )
+    list_filter = ('user', 'albums', )
 
     def save_model(self, request, obj, form, change):
+        """
+        Use owner of first album associated with this image to be the owner of this image
+        """
+        album_id = request.POST['albums'][0]
+        album = Album.objects.get(pk=album_id)
+        obj.user = album.user
         obj.save()
-        msgs = form.assign_image_owner(obj)
-        for msg in msgs:
-            message = msg['message']
-            name = msg['name']
-            if msg['type'] == 'success':
-                messages.success(request, message % ('"' + name + '"'))
-            else:
-                messages.warning(request, message % ('"' + name + '"'))
 
 
 class AlbumUploadAdmin(admin.ModelAdmin):
     form = ZipImageAdminForm
+
     def has_change_permission(self, request, obj=None):
         return False
 

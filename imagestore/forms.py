@@ -64,36 +64,33 @@ class ImageAdminForm(forms.ModelForm):
         self.fields['albums'] = AlbumOwnerMultipleChoiceField(
             queryset=Album.objects.all().order_by('user__first_name', 'name'))
 
-    def assign_image_owner(self, obj):
-        messages = []
-        saved_user = None
-        for album in self.cleaned_data['albums']:
-            if saved_user is None:
-                obj.user = album.user
-                obj.save()
-                saved_user = album.user
-                messages.append({
-                    'type': 'success',
-                    'message': "%s (" + album.name + ") saved as owner of this work of art.",
-                    'name': album.user.get_full_name()
-                })
-            elif saved_user == album.user:
-                # Assigned to more than one Album owned by same User
-                messages.append({
-                    'type': 'success',
-                    'message': "%s (" + album.name + ") saved as owner of this work of art.",
-                    'name': album.user.get_full_name()
-                })
+    def clean_albums(self):
+        msgs = []
+        user = None
+        with_error = False
+
+        data = self.cleaned_data
+
+        for album in data['albums']:
+            if user is None:
+                user = album.user
+            if user == album.user:
+                msgs.append({'valid': True, 'user': album.user.get_full_name(), 'name': album.name})
             else:
-                # Attempt to assign to more than one Album owned by different
-                # User but this is not allowed since an Image can only be owned
-                # by one User.
-                messages.append({
-                    'type': 'warning',
-                    'message': "%s (" + album.name + ") wasn't saved as owner of this work of art.",
-                    'name': album.user.get_full_name()
-                })
-        return messages
+                msgs.append({'valid': False, 'user': album.user.get_full_name(), 'name': album.name})
+                with_error = True
+
+        if with_error:
+            valid_msg = ""
+            invalid_msg = ""
+            for msg in msgs:
+                if msg['valid']:
+                    valid_msg += "Image was assigned to {0} on \"{1}\". ".format(msg['user'], msg['name'])
+                else:
+                    invalid_msg += "But re-assignment to {0} on \"{1}\" is not allowed. ".format(msg['user'], msg['name'])
+
+            raise forms.ValidationError(valid_msg + invalid_msg)
+        return data['albums']
 
 
 class ZipImageAdminForm(forms.ModelForm):

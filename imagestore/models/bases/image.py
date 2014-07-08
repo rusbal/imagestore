@@ -65,6 +65,16 @@ class BaseImage(models.Model):
     def __unicode__(self):
         return '%s' % self.title
 
+    def admin_thumbnail_path(self):
+        try:
+            return get_thumbnail(self.image, '100x100', crop='center').url
+        except IOError:
+            logger.exception('IOError for image %s', self.image)
+            return 'IOError'
+        except ThumbnailError, ex:
+            return 'ThumbnailError, %s' % ex.message
+    admin_thumbnail_path.short_description = _('Thumbnail path')
+
     def admin_thumbnail(self):
         try:
             return '<img src="%s">' % get_thumbnail(self.image, '100x100', crop='center').url

@@ -8,11 +8,14 @@ except ImportError:
 
 __author__ = 'zeus'
 
-from django import forms
-from django.utils.translation import ugettext_lazy as _
-from django.contrib.auth.models import User
-
 import zipfile
+
+from django import forms
+from django.contrib.auth.models import User
+from django.utils.translation import ugettext_lazy as _
+from django.utils.safestring import mark_safe
+
+from sorl.thumbnail.admin.current import AdminImageWidget
 
 from models import Image, Album
 
@@ -54,6 +57,54 @@ class AlbumOwnerChoiceField(forms.ModelChoiceField):
 class AlbumOwnerMultipleChoiceField(forms.ModelMultipleChoiceField):
     def label_from_instance(self, obj):
         return obj.name_with_owner()
+
+class MediaFileWidget(forms.TextInput):
+    """
+    COPIED FROM FeinCMS code
+    TextInput widget, shows a link to the current value if there is one.
+    """
+
+    def render(self, name, value, attrs=None):
+
+        inputfield = super(MediaFileWidget, self).render(name, value, attrs)
+        if value:
+            try:
+                mf = Image.objects.get(pk=value)
+            except Image.DoesNotExist:
+                return inputfield
+
+            # caption = mf.title
+            # image = mf.admin_thumbnail_path()
+            # image = u'background: url(%(url)s) center center no-repeat;' % {'url': image}
+            # return mark_safe(u"""
+            #     <div style="%(image)s" class="admin-gallery-image-bg absolute">
+            #     <p class="admin-gallery-image-caption absolute">%(caption)s</p>
+            #     %(inputfield)s</div>""" % {
+            #         'image': image,
+            #         'caption': caption,
+            #         'inputfield': inputfield})
+
+            return mark_safe(mf.admin_thumbnail())
+
+        return inputfield
+
+
+class InlineImageForm(forms.ModelForm):
+    mediafile = forms.ModelChoiceField(queryset=Image.objects.all(),
+                                       widget=MediaFileWidget(attrs={'class': 'image-fk'}),
+                                       label=_('image file'),
+                                       required=False)
+
+    class Meta:
+        model = Image
+
+    def __init__(self, *args, **kwargs):
+        super(InlineImageForm, self).__init__(*args, **kwargs)
+        try:
+            image = Image.objects.get(pk=self.instance.image_id)
+            self.fields["mediafile"].initial = image.pk
+        except:
+            pass
 
 
 class ImageAdminForm(forms.ModelForm):

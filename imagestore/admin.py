@@ -2,15 +2,17 @@ from django.contrib import admin
 from imagestore.models import Image, Album, AlbumUpload
 from sorl.thumbnail.admin import AdminInlineImageMixin
 from django.conf import settings
-from django.contrib import messages
 
-from forms import AlbumAdminForm, ImageAdminForm, ZipImageAdminForm
+from forms import AlbumAdminForm, ImageAdminForm, ZipImageAdminForm, InlineImageForm
 from helpers.string import reverse_slug
 
 
 class InlineImageAdmin(AdminInlineImageMixin, admin.TabularInline):
+    form = InlineImageForm
     model = Image.albums.through
+    fields = ('mediafile', 'image')
     extra = 0
+
 
 class AlbumAdmin(admin.ModelAdmin):
     form = AlbumAdminForm

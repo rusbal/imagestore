@@ -5,6 +5,7 @@ from django.conf import settings
 from django.contrib import messages
 
 from forms import AlbumAdminForm, ImageAdminForm, ZipImageAdminForm
+from helpers.string import reverse_slug
 
 
 class InlineImageAdmin(AdminInlineImageMixin, admin.TabularInline):
@@ -29,6 +30,13 @@ class ImageAdmin(admin.ModelAdmin):
     list_filter = ('user', 'albums', )
 
     def save_model(self, request, obj, form, change):
+        """
+        Assign filename as title if not supplied
+        """
+        if not obj.title:
+            obj.title = reverse_slug(request.FILES['image'].name, remove_extension=True, title=True)
+            print obj.title
+
         """
         Use owner of first album associated with this image to be the owner of this image
         """

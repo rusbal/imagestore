@@ -3,6 +3,7 @@ def reverse_slug(string, remove_extension=False, title=False):
         string = ' '.join(string.split('.')[:-1])
 
     string = ' '.join(string.split('-'))
+    string = ' '.join(string.split('_'))
     string = ' '.join(string.split())
 
     if title:

@@ -59,6 +59,10 @@ class BaseAlbum(models.Model):
             else:
                 return None
 
+    def set_head(self, id, head):
+        self.head = head
+        self.save()
+
     @permalink
     def get_absolute_url(self):
         return 'imagestore:album', (), {'album_id': self.id}

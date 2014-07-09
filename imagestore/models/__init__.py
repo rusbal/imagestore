@@ -16,6 +16,15 @@ class AlbumImage(models.Model):
     image = models.ForeignKey(Image)
     order = models.IntegerField(_('Order'), default=0)
 
+    __original_order = None
+
+    def __init__(self, *args, **kwargs):
+        super(AlbumImage, self).__init__(*args, **kwargs)
+        self.__original_order = self.order
+
+    def __unicode__(self):
+        return "%s" % self.pk
+
     class Meta:
         db_table = 'imagestore_album_images'
         ordering = ('order',)
@@ -25,6 +34,14 @@ class AlbumImage(models.Model):
         if not self.order:
             self.order = 0
         super(AlbumImage, self).save(*args, **kwargs)
+        if self.order != self.__original_order:
+            """
+            When order is changed, set Albums head image to the first in order
+            """
+            first_img = AlbumImage.objects.filter(album = self.album).all()[0]
+            self.album.set_head(self.album.pk, first_img.image)
+        self.__original_order = self.order
+
 
 # Album = load_class(getattr(settings, 'IMAGESTORE_ALBUM_MODEL', 'imagestore.models.album.Album'))
 # Image = load_class(getattr(settings, 'IMAGESTORE_IMAGE_MODEL', 'imagestore.models.image.Image'))

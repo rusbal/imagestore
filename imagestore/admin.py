@@ -37,7 +37,6 @@ class ImageAdmin(admin.ModelAdmin):
         """
         if not obj.title:
             obj.title = reverse_slug(request.FILES['image'].name, remove_extension=True, title=True)
-            print obj.title
 
         if not change:
             """

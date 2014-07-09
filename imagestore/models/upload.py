@@ -17,7 +17,7 @@ try:
 except ImportError:
     from PIL import Image as PILImage
 
-from imagestore.models import Album, Image
+from imagestore.models import Album, Image, AlbumImage
 from imagestore.helpers.string import reverse_slug
 
 TEMP_DIR = getattr(settings, 'TEMP_DIR', 'temp/')
@@ -32,8 +32,11 @@ def process_zipfile(uploaded_album):
             raise Exception('"%s" in the .zip archive is corrupt.' % bad_file)
 
         if not uploaded_album.album:
-            uploaded_album.album = Album.objects.create(name=uploaded_album.new_album_name,
-                                                        user=uploaded_album.user)
+            uploaded_album.album = Album.objects.get(name=uploaded_album.new_album_name,
+                                                     user=uploaded_album.user)
+            if not uploaded_album.album:
+                uploaded_album.album = Album.objects.create(name=uploaded_album.new_album_name,
+                                                            user=uploaded_album.user)
 
         from cStringIO import StringIO
         for filename in sorted(zip.namelist()):
@@ -61,7 +64,10 @@ def process_zipfile(uploaded_album):
                     img.user = uploaded_album.album.user
                     img.title = reverse_slug(filename, remove_extension=True, title=True)
                     img.save()
-                    img.albums.add(uploaded_album.album)
+
+                    AlbumImage.objects.create(album=uploaded_album.album,
+                                              image=img,
+                                              order=0)
                 except Exception, ex:
                     print('error create Image: %s' % ex.message)
         zip.close()

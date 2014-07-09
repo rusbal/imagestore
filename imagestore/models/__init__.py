@@ -7,18 +7,8 @@ from django.db import models
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 
-Album = load_class(getattr(settings, 'IMAGESTORE_ALBUM_MODEL', 'imagestore.models.album.Album'))
-Image = load_class(getattr(settings, 'IMAGESTORE_IMAGE_MODEL', 'imagestore.models.image.Image'))
-
-# This labels and classnames used to generate permissons labels
-image_applabel = Image._meta.app_label
-image_classname = Image.__name__.lower()
-
-album_applabel = Album._meta.app_label
-album_classname = Album.__name__.lower()
-
-
-from upload import AlbumUpload
+from imagestore.models.album import Album
+from imagestore.models.image import Image
 
 
 class AlbumImage(models.Model):
@@ -29,8 +19,25 @@ class AlbumImage(models.Model):
     class Meta:
         db_table = 'imagestore_album_images'
         ordering = ('order',)
+        app_label = 'imagestore'
 
     def save(self, *args, **kwargs):
         if not self.order:
             self.order = 0
         super(AlbumImage, self).save(*args, **kwargs)
+
+# Album = load_class(getattr(settings, 'IMAGESTORE_ALBUM_MODEL', 'imagestore.models.album.Album'))
+# Image = load_class(getattr(settings, 'IMAGESTORE_IMAGE_MODEL', 'imagestore.models.image.Image'))
+
+# This labels and classnames used to generate permissons labels
+image_applabel = Image._meta.app_label
+image_classname = Image.__name__.lower()
+
+album_applabel = Album._meta.app_label
+album_classname = Album.__name__.lower()
+
+albumimage_applabel = AlbumImage._meta.app_label
+albumimage_classname = AlbumImage.__name__.lower()
+
+
+from upload import AlbumUpload

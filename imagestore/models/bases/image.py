@@ -43,7 +43,7 @@ class BaseImage(models.Model):
     """
     class Meta(object):
         abstract = True
-        ordering = ('order', 'id')
+        ordering = ('title', 'id')
         permissions = (
             ('moderate_images', 'View, update and delete any image'),
         )
@@ -51,12 +51,11 @@ class BaseImage(models.Model):
     title = models.CharField(_('Title'), max_length=100)
     description = models.TextField(_('Description'), blank=True, null=True)
     tags = TagField(_('Tags'), blank=True)
-    order = models.IntegerField(_('Order'), default=0)
     image = ImageField(verbose_name = _('File'), upload_to=get_file_path)
     created = models.DateTimeField(_('Created'), auto_now_add=True, null=True)
     updated = models.DateTimeField(_('Updated'), auto_now=True, null=True)
-    albums = models.ManyToManyField(get_model_string('Album'), verbose_name=_('Album'), related_name='images')
-    user = models.ForeignKey(User, verbose_name=_('Owner'), related_name='images', blank=True, null=True, editable=False)
+    user = models.ForeignKey(User, verbose_name=_('Owner'), related_name='images', blank=True, null=True)
+    albums = models.ManyToManyField(get_model_string('Album'), through='AlbumImage', verbose_name=_('Album'), related_name='images')
 
     @permalink
     def get_absolute_url(self):

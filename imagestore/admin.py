@@ -1,5 +1,5 @@
 from django.contrib import admin
-from imagestore.models import Image, Album, AlbumUpload
+from imagestore.models import Image, Album, AlbumUpload, AlbumImage
 from sorl.thumbnail.admin import AdminInlineImageMixin
 from django.conf import settings
 
@@ -9,8 +9,8 @@ from helpers.string import reverse_slug
 
 class InlineImageAdmin(AdminInlineImageMixin, admin.TabularInline):
     form = InlineImageForm
-    model = Image.albums.through
-    fields = ('mediafile', 'image')
+    model = AlbumImage
+    fields = ('mediafile', 'image', 'order')
     extra = 0
 
 
@@ -26,9 +26,8 @@ admin.site.register(Album, AlbumAdmin)
 
 class ImageAdmin(admin.ModelAdmin):
     form = ImageAdminForm
-    fieldsets = ((None, {'fields': ['image', 'albums', 'title', 'description', 'order', 'tags']}),)
-    list_display = ('admin_thumbnail', 'title', 'user', 'order')
-    list_editable = ('order', )
+    fieldsets = ((None, {'fields': ['image', 'title', 'description', 'user', 'tags']}),)
+    list_display = ('admin_thumbnail', 'title', 'user')
     list_filter = ('user', 'albums', )
 
     def save_model(self, request, obj, form, change):
@@ -38,13 +37,8 @@ class ImageAdmin(admin.ModelAdmin):
         if not obj.title:
             obj.title = reverse_slug(request.FILES['image'].name, remove_extension=True, title=True)
 
-        if not change:
-            """
-            Use owner of first album associated with this image to be the owner of this image
-            """
-            album_id = request.POST['albums']
-            album = Album.objects.get(pk=album_id)
-            obj.user = album.user
+        if not obj.user:
+            obj.user = request.user
         obj.save()
 
 

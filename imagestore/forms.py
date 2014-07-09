@@ -20,6 +20,11 @@ from sorl.thumbnail.admin.current import AdminImageWidget
 from models import Image, Album
 
 
+class UserChoiceField(forms.ModelChoiceField):
+    def label_from_instance(self, obj):
+        return obj.get_full_name() or obj.username
+
+
 class ImageForm(forms.ModelForm):
     class Meta(object):
         model = Image
@@ -94,6 +99,8 @@ class InlineImageForm(forms.ModelForm):
                                        widget=MediaFileWidget(attrs={'class': 'image-fk'}),
                                        label=_('image file'),
                                        required=False)
+    order = forms.IntegerField(label=_('order'),
+                               required=False)
 
     class Meta:
         model = Image
@@ -114,37 +121,10 @@ class ImageAdminForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(ImageAdminForm, self).__init__(*args, **kwargs)
-        self.fields['albums'] = AlbumOwnerMultipleChoiceField(
-            queryset=Album.objects.all().order_by('user__first_name', 'name'))
         self.fields['title'].required = False
-
-    def clean_albums(self):
-        msgs = []
-        user = None
-        with_error = False
-
-        data = self.cleaned_data
-
-        for album in data['albums']:
-            if user is None:
-                user = album.user
-            if user == album.user:
-                msgs.append({'valid': True, 'user': album.user.get_full_name(), 'name': album.name})
-            else:
-                msgs.append({'valid': False, 'user': album.user.get_full_name(), 'name': album.name})
-                with_error = True
-
-        if with_error:
-            valid_msg = ""
-            invalid_msg = ""
-            for msg in msgs:
-                if msg['valid']:
-                    valid_msg += "Image was assigned to {0} on \"{1}\". ".format(msg['user'], msg['name'])
-                else:
-                    invalid_msg += "But re-assignment to {0} on \"{1}\" is not allowed. ".format(msg['user'], msg['name'])
-
-            raise forms.ValidationError(valid_msg + invalid_msg)
-        return data['albums']
+        self.fields['user'] = UserChoiceField(
+            queryset=User.objects.filter(is_active=True))
+        self.fields['user'].required = False
 
 
 class ZipImageAdminForm(forms.ModelForm):
@@ -159,12 +139,6 @@ class ZipImageAdminForm(forms.ModelForm):
         if not zipfile.is_zipfile(data['zip_file'].file):
             raise forms.ValidationError("Please select a zip file.")
         return data['zip_file']
-
-
-
-class UserChoiceField(forms.ModelChoiceField):
-    def label_from_instance(self, obj):
-        return obj.get_full_name() or obj.username
 
 
 class AlbumAdminForm(forms.ModelForm):

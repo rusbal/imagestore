@@ -1,8 +1,9 @@
 from django.contrib import admin
-from imagestore.models import Image, Album, AlbumUpload, AlbumImage
-from sorl.thumbnail.admin import AdminInlineImageMixin
 from django.conf import settings
+from django.db.models import Count
+from sorl.thumbnail.admin import AdminInlineImageMixin
 
+from imagestore.models import Image, Album, AlbumUpload, AlbumImage
 from forms import AlbumAdminForm, ImageAdminForm, ZipImageAdminForm, InlineImageForm
 from helpers.string import reverse_slug
 
@@ -17,9 +18,17 @@ class InlineImageAdmin(AdminInlineImageMixin, admin.TabularInline):
 class AlbumAdmin(admin.ModelAdmin):
     form = AlbumAdminForm
     fieldsets = ((None, {'fields': ['name', 'user', 'is_public', 'order']}),)
-    list_display = ('name', 'admin_thumbnail', 'user', 'is_public', 'order', 'created', 'updated')
+    list_display = ('name', 'admin_thumbnail', 'image_count', 'user', 'is_public', 'order')
     list_editable = ('order', )
+    list_filter = ('user',)
     inlines = [InlineImageAdmin]
+
+    def queryset(self, request):
+        return Album.objects.annotate(image_count=Count('images'))
+
+    def image_count(self, inst):
+        return inst.image_count
+    image_count.admin_order_field = 'image_count'
 
 admin.site.register(Album, AlbumAdmin)
 

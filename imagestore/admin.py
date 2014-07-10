@@ -38,7 +38,7 @@ admin.site.register(Album, AlbumAdmin)
 
 class ImageAdmin(admin.ModelAdmin):
     form = ImageAdminForm
-    fieldsets = ((None, {'fields': ['image', 'title', 'description', 'user', 'tags']}),)
+    fieldsets = ((None, {'fields': ['mediafile', 'image', 'title', 'description', 'user', 'tags']}),)
     list_display = ('admin_thumbnail', 'title', 'user')
     list_filter = ('user', 'albums', )
     list_editable = ('title', 'user', )

@@ -115,6 +115,10 @@ class InlineImageForm(forms.ModelForm):
 
 
 class ImageAdminForm(forms.ModelForm):
+    mediafile = forms.ModelChoiceField(queryset=Image.objects.all(),
+                                       widget=MediaFileWidget(attrs={'class': 'image-fk'}),
+                                       label=_('image file'),
+                                       required=False)
 
     class Meta:
         model = Image
@@ -125,6 +129,7 @@ class ImageAdminForm(forms.ModelForm):
         self.fields['user'] = UserChoiceField(
             queryset=User.objects.filter(is_active=True))
         self.fields['user'].required = False
+        self.fields['mediafile'].initial = self.instance.pk
 
 
 class ZipImageAdminForm(forms.ModelForm):

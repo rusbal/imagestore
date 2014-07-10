@@ -112,30 +112,41 @@ class ImageView(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super(ImageView, self).get_context_data(**kwargs)
+
         image = context['image']
+        album = context['album']
+        albumimage = image.albumimage_set.get(album=album, image=image)
 
         base_qs = self.get_queryset()
         count = base_qs.count()
+
         img_pos = base_qs.filter(
-            Q(albumimage_set__order__lt=albumimage__order)|
-            Q(id__lt=image.id, albumimage_set__order=albumimage__order)
+            Q(albumimage__album_id=album.pk,
+              albumimage__order__lt=albumimage.order)|
+            Q(albumimage__album_id=album.pk,
+              id__lt=image.id, albumimage__order=albumimage.order)
         ).count()
+
         next = None
         previous = None
         if count - 1 > img_pos:
             try:
                 next = base_qs.filter(
-                    Q(order__gt=image.order)|
-                    Q(id__gt=image.id, order=image.order)
-                )[0]
+                    Q(albumimage__album_id=album.pk,
+                      albumimage__order__gt=albumimage.order)|
+                    Q(albumimage__album_id=album.pk,
+                      id__gt=image.id, albumimage__order=albumimage.order)
+                ).order_by('albumimage__order', 'id')[0]
             except IndexError:
                 pass
         if img_pos > 0:
             try:
                 previous = base_qs.filter(
-                    Q(order__lt=image.order)|
-                    Q(id__lt=image.id, order=image.order)
-                ).order_by('-order', '-id')[0]
+                    Q(albumimage__album_id=album.pk,
+                      albumimage__order__lt=albumimage.order)|
+                    Q(albumimage__album_id=album.pk,
+                      id__lt=image.id, albumimage__order=albumimage.order)
+                ).order_by('-albumimage__order', '-id')[0]
             except IndexError:
                 pass
         context['next'] = next

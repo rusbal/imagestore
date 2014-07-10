@@ -133,6 +133,9 @@ class ZipImageAdminForm(forms.ModelForm):
         self.fields['album'] = AlbumOwnerChoiceField(
             queryset=Album.objects.all().order_by('user__first_name', 'name'))
         self.fields['album'].required = False
+        self.fields['user'] = UserChoiceField(
+            queryset=User.objects.filter(is_active=True))
+        self.fields['user'].required = False
 
     def clean_zip_file(self):
         data = self.cleaned_data

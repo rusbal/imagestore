@@ -17,7 +17,7 @@ class InlineImageAdmin(AdminInlineImageMixin, admin.TabularInline):
 
 class AlbumAdmin(admin.ModelAdmin):
     form = AlbumAdminForm
-    fieldsets = ((None, {'fields': ['name', 'user', 'is_public', 'order']}),)
+    fields = ('name', 'user', 'is_public', 'order')
     list_display = ('name', 'owner', 'admin_thumbnail', 'image_count', 'is_public', 'order')
     list_editable = ('order', )
     list_filter = ('user',)
@@ -57,7 +57,7 @@ class ImageAdmin(admin.ModelAdmin):
 
 class AlbumUploadAdmin(admin.ModelAdmin):
     form = ZipImageAdminForm
-    fieldsets = ((None, {'fields': ['zip_file', 'new_album_name', 'album', 'tags']}),)
+    fields = ('zip_file', ('new_album_name', 'user'), 'album', 'tags')
 
     def has_change_permission(self, request, obj=None):
         return False

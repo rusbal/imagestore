@@ -17,8 +17,14 @@ try:
 except ImportError:
     from PIL import Image as PILImage
 
+try:
+    from django.contrib.auth import get_user_model
+    User = get_user_model()
+except ImportError:
+    from django.contrib.auth.models import User
+
 from imagestore.models import Album, Image, AlbumImage
-from imagestore.helpers.string import reverse_slug
+from imagestore.helpers.string import reverse_slug 
 
 TEMP_DIR = getattr(settings, 'TEMP_DIR', 'temp/')
 
@@ -108,6 +114,7 @@ class AlbumUpload(models.Model):
         verbose_name=_('New album name'),
         help_text=_('If not empty new album with this name will be created and images will be upload to this album<br><strong>You will be the automatic owner of this new album.</strong>')
         )
+    user = models.ForeignKey(User, verbose_name=_('Owner'), null=True, blank=True)
     tags = models.CharField(max_length=255, blank=True, verbose_name=_('tags'))
 
     class Meta(object):

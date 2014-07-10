@@ -63,7 +63,14 @@ class AlbumUploadAdmin(admin.ModelAdmin):
         return False
 
     def save_model(self, request, obj, form, change):
-        obj.user = request.user
+        """
+        Assign filename as title if not supplied
+        """
+        if not obj.new_album_name:
+            obj.new_album_name = reverse_slug(request.FILES['zip_file'].name, remove_extension=True, title=True)
+
+        if not obj.user:
+            obj.user = request.user
         obj.save()
 
 IMAGE_MODEL = getattr(settings, 'IMAGESTORE_IMAGE_MODEL', None)

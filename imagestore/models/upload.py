@@ -32,9 +32,10 @@ def process_zipfile(uploaded_album):
             raise Exception('"%s" in the .zip archive is corrupt.' % bad_file)
 
         if not uploaded_album.album:
-            uploaded_album.album = Album.objects.get(name=uploaded_album.new_album_name,
-                                                     user=uploaded_album.user)
-            if not uploaded_album.album:
+            try:
+                uploaded_album.album = Album.objects.get(name=uploaded_album.new_album_name,
+                                                         user=uploaded_album.user)
+            except Album.DoesNotExist:
                 uploaded_album.album = Album.objects.create(name=uploaded_album.new_album_name,
                                                             user=uploaded_album.user)
 

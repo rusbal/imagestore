@@ -143,6 +143,21 @@ class ZipImageAdminForm(forms.ModelForm):
             raise forms.ValidationError("Please select a zip file.")
         return data['zip_file']
 
+    def clean(self):
+        data = self.cleaned_data
+
+        if data['album']: 
+            if data['new_album_name'] or data['user']:
+                raise forms.ValidationError("Please either enter a new album name/owner or select an existing album but not both.")
+        else:
+            if not data['user']:
+                if data['new_album_name']:
+                    raise forms.ValidationError("Please select owner of %s." % data['new_album_name']) 
+                else:
+                    raise forms.ValidationError("Please select owner.") 
+        
+        return data
+
 
 class AlbumAdminForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):

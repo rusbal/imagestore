@@ -6,6 +6,17 @@
     $.get('/gallery/thumbs/', function(result){
         if (result.success) {
             thumbs = result.thumbs;
+
+            /**
+             * On page load, show images
+             * This solves the problem of the images not showing when an error
+             * (duplicate image) occured.
+             */
+            $('tr.dynamic-albumimage_set').children('.field-mediafile').children('input').each(function(index){
+                image = $(this).parent().siblings('.field-image').children('select').val();
+                $(this).parent().append('<img src="'+thumbs[image]+'"/>');
+                $(this).remove();
+            });
         }
     }, 'json');
 
@@ -30,9 +41,4 @@
          */
         $('tr.dynamic-albumimage_set').last().children('.field-mediafile').empty();
     });
-
-    /**
-     * On page load, hide input
-     */
-    $('tr.dynamic-albumimage_set').find('.field-mediafile input').empty();
 });})(django.jQuery);

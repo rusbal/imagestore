@@ -23,6 +23,11 @@ class AlbumAdmin(admin.ModelAdmin):
     list_filter = ('user',)
     inlines = [InlineImageAdmin]
 
+    class Media:
+        from django.conf import settings
+        static_url = getattr(settings, 'STATIC_URL', '/static/')
+        js = [static_url + 'imagestore/admin/js/change-album.js',]
+
     def owner(self, obj):
         return obj.user.get_full_name()
 

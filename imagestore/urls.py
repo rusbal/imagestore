@@ -29,5 +29,6 @@ urlpatterns = patterns('imagestore.views',
                        url(r'^image/(?P<pk>\d+)/update/$', UpdateImage.as_view(), name='update-image'),
                        )
 
-
-
+urlpatterns += patterns('imagestore.ajax',
+                       url(r'^thumbs/$', 'get_image_thumbs'),
+                       ) 

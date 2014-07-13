@@ -30,4 +30,9 @@
          */
         $('tr.dynamic-albumimage_set').last().children('.field-mediafile').empty();
     });
+
+    /**
+     * On page load, hide input
+     */
+    $('tr.dynamic-albumimage_set').find('.field-mediafile input').empty();
 });})(django.jQuery);

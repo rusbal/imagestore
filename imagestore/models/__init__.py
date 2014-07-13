@@ -28,6 +28,7 @@ class AlbumImage(models.Model):
     class Meta:
         db_table = 'imagestore_album_images'
         ordering = ('order',)
+        unique_together = ('album', 'image')
         app_label = 'imagestore'
 
     def save(self, *args, **kwargs):

@@ -14,24 +14,51 @@
              */
             $('tr.dynamic-albumimage_set').children('.field-mediafile').children('input').each(function(index){
                 image = $(this).parent().siblings('.field-image').children('select').val();
-                $(this).parent().append('<img src="'+thumbs[image]+'"/>');
+                if (image === "") {
+                    $(this).parent().append('<img src="" style="visibility:hidden"/>');
+                } else {
+                    $(this).parent().append('<img src="'+thumbs[image]+'"/>');
+                }
                 $(this).remove();
             });
         }
     }, 'json');
 
-    $('select[id^="id_albumimage_set-"]').change(function(){
-        var td = $(this).parents('tr').children('td.field-mediafile');
+    function img_to_td(img, td){
         if (td.is(':empty')) {
             /**
              * New image
              */
-            td.append('<img src="'+thumbs[this.value]+'"/>');
+            td.append('<img src="'+img+'"/>');
         } else {
             /**
              * Update old image
              */
-            td.children('img').attr('src', thumbs[this.value]);
+            td.children('img').attr('src', img);
+        }
+    }
+
+    $('select[id^="id_albumimage_set-"]').change(function(){
+        var td = $(this).parents('tr').children('td.field-mediafile');
+        if (this.value) {
+            if (this.value in thumbs) {
+                img_to_td(thumbs[this.value], td);
+                td.children('img').css('visibility', 'visible');
+            } else {
+                /**
+                 * Get new value of thumbs
+                 */
+                var thumb_key = this.value;
+                $.get('/gallery/thumbs/', function(result){
+                    if (result.success) {
+                        thumbs = result.thumbs;
+                        img_to_td(thumbs[thumb_key], td);
+                        td.children('img').css('visibility', 'visible');
+                    }
+                }, 'json');
+            }
+        } else {
+            td.children('img').css('visibility', 'hidden');
         }
     });
 

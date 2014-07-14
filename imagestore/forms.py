@@ -144,7 +144,13 @@ class ZipImageAdminForm(forms.ModelForm):
 
     def clean_zip_file(self):
         data = self.cleaned_data
-        if not zipfile.is_zipfile(data['zip_file'].file):
+
+        """
+        data['zip_file'].file as _io.BytesIO object gives the "coercing to Unicode: need string or buffer, BytesIO found"
+        on Alwaysdata but runs well on my localhost.
+        # if not zipfile.is_zipfile(data['zip_file'].file):
+        """
+        if not zipfile.is_zipfile(data['zip_file']):
             raise forms.ValidationError("Please select a zip file.")
         return data['zip_file']
 

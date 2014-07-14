@@ -111,7 +111,7 @@ class AlbumUpload(models.Model):
         max_length=255,
         blank=True,
         verbose_name=_('New album name'),
-        help_text=_('If not empty new album with this name will be created and images will be upload to this album')
+        help_text=_('Images will be upload to this album')
         )
     user = models.ForeignKey(User, verbose_name=_('owner'), null=True, blank=True,
         help_text=_('Select user only if entering a new album name')
@@ -119,8 +119,8 @@ class AlbumUpload(models.Model):
     tags = models.CharField(max_length=255, blank=True, verbose_name=_('tags'))
 
     class Meta(object):
-        verbose_name = _('Album upload')
-        verbose_name_plural = _('Album uploads')
+        verbose_name = _('Image ZIP to album')
+        verbose_name_plural = _('Image ZIP to album')
         app_label = 'imagestore'
 
     def save(self, *args, **kwargs):

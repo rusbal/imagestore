@@ -78,7 +78,6 @@ def process_zipfile(uploaded_album):
                 except Exception, ex:
                     print('error create Image: %s' % ex.message)
         zip.close()
-        uploaded_album.delete()
 
 
 upload_processor_function = getattr(settings, 'IMAGESTORE_UPLOAD_ALBUM_PROCESSOR', None)

@@ -1,6 +1,8 @@
 from django.contrib import admin
 from django.conf import settings
+from django.core.urlresolvers import reverse
 from django.db.models import Count
+from django.http import HttpResponseRedirect
 from sorl.thumbnail.admin import AdminInlineImageMixin
 
 from imagestore.models import Image, Album, AlbumUpload, AlbumImage
@@ -19,8 +21,8 @@ class AlbumAdmin(admin.ModelAdmin):
     form = AlbumAdminForm
     fields = ('name', 'user', 'is_public', 'order')
     list_display = ('name', 'owner', 'admin_thumbnail', 'image_count', 'is_public', 'order')
-    list_editable = ('order', )
-    list_filter = ('user',)
+    list_editable = ('order', 'is_public')
+    list_filter = ('user', 'is_public')
     inlines = [InlineImageAdmin]
 
     class Media:
@@ -68,15 +70,22 @@ class AlbumUploadAdmin(admin.ModelAdmin):
         return False
 
     def save_model(self, request, obj, form, change):
+        if not obj.user:
+            obj.user = request.user
+
         """
         Assign filename as title if not supplied
         """
         if not obj.new_album_name:
-            obj.new_album_name = reverse_slug(request.FILES['zip_file'].name, remove_extension=True, title=True)
-
-        if not obj.user:
-            obj.user = request.user
+            obj.new_album_name = obj.user.get_full_name() \
+                + ' ' + reverse_slug(request.FILES['zip_file'].name, remove_extension=True, title=True) 
         obj.save()
+
+    def response_add(self, request, obj, post_url_continue=None):
+        post_url_continue = reverse("admin:imagestore_album_change", args=(obj.album.pk,))
+        obj.delete()
+        return HttpResponseRedirect(post_url_continue)
+
 
 IMAGE_MODEL = getattr(settings, 'IMAGESTORE_IMAGE_MODEL', None)
 if not IMAGE_MODEL:

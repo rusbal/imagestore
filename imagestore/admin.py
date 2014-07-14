@@ -71,6 +71,10 @@ class ImageAdmin(FilterUserAdmin):
     list_filter = ('user', 'albums', )
     list_editable = ('title', 'user', )
 
+    class Media:
+        static_url = getattr(settings, 'STATIC_URL', '/static/')
+        js = [static_url + 'imagestore/admin/js/add-image.js',]
+
     def save_model(self, request, obj, form, change):
         """
         Assign filename as title if not supplied

@@ -127,10 +127,16 @@ class ImageAdminForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(ImageAdminForm, self).__init__(*args, **kwargs)
+
         self.fields['title'].required = False
-        self.fields['user'] = UserChoiceField(
-            queryset=User.objects.filter(is_active=True))
+
+        qu = User.objects.filter(is_active=True)
+        owner = get_request().user
+        if not owner.is_superuser:
+            qu = qu.filter(pk=owner.pk)
+        self.fields['user'] = UserChoiceField(queryset=qu)
         self.fields['user'].required = False
+
         self.fields['mediafile'].initial = self.instance.pk
 
 

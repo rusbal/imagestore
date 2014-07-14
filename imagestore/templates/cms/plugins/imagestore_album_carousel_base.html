@@ -1,5 +1,5 @@
 {% load thumbnail %}
-<div id='examples'>
+<div id='thumbcontainer'>
     <ul id='carusel{{ carousel.id }}' class="{{ carousel.skin }}" >
     {% for image in images %}
         {% thumbnail image.image carousel.size crop="center" as im %}

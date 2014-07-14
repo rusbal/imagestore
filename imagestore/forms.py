@@ -115,6 +115,18 @@ class InlineImageForm(forms.ModelForm):
         except:
             pass
 
+        """
+        Build selection according to Album owner
+        """
+        qi = Image.objects.all()
+        owner = get_request().user
+        if not owner.is_superuser:
+            qi = qi.filter(user=owner)
+
+        img = [(u'',u'----------')]
+        img.extend([(i.pk, i.__unicode__()) for i in qi])
+        self.fields['image'].choices = img
+
 
 class ImageAdminForm(forms.ModelForm):
     mediafile = forms.ModelChoiceField(queryset=Image.objects.all(),

@@ -197,5 +197,9 @@ class ZipImageAdminForm(forms.ModelForm):
 class AlbumAdminForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(AlbumAdminForm, self).__init__(*args, **kwargs)
-        self.fields['user'] = UserChoiceField(
-            queryset=User.objects.filter(is_active=True))
+
+        qu = User.objects.filter(is_active=True)
+        owner = get_request().user
+        if not owner.is_superuser:
+            qu = qu.filter(pk=owner.pk)
+        self.fields['user'] = UserChoiceField(queryset=qu)

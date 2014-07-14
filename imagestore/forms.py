@@ -6,6 +6,8 @@ try:
 except ImportError:
     AUTOCOMPLETE_LIGHT_INSTALLED = False
 
+from imagestore.middleware.request import get_request
+
 __author__ = 'zeus'
 
 import zipfile
@@ -135,11 +137,20 @@ class ImageAdminForm(forms.ModelForm):
 class ZipImageAdminForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(ZipImageAdminForm, self).__init__(*args, **kwargs)
-        self.fields['album'] = AlbumOwnerChoiceField(
-            queryset=Album.objects.all().order_by('user__first_name', 'name'))
+
+        owner = get_request().user
+
+        qa = Album.objects.all().order_by('user__first_name', 'name')
+        qu = User.objects.filter(is_active=True)
+
+        if not owner.is_superuser:
+            qa = qa.filter(user=owner)
+            qu = qu.filter(pk=owner.pk)
+
+        self.fields['album'] = AlbumOwnerChoiceField(queryset=qa) 
         self.fields['album'].required = False
-        self.fields['user'] = UserChoiceField(
-            queryset=User.objects.filter(is_active=True))
+
+        self.fields['user'] = UserChoiceField(queryset=qu)
         self.fields['user'].required = False
 
     def clean_zip_file(self):

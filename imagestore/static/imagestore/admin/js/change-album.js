@@ -67,7 +67,7 @@
         }
     });
 
-    $('tr.add-row').click(function(){
+    $('tr.add-row a').click(function(){
         /**
          * Hide input
          */

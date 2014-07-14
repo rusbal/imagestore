@@ -148,8 +148,8 @@ class ZipImageAdminForm(forms.ModelForm):
         """
         Python 2.7
         """
-    #     if not zipfile.is_zipfile(data['zip_file'].file):
-    #         raise forms.ValidationError("Please select a zip file.")
+        # if not zipfile.is_zipfile(data['zip_file'].file):
+        #     raise forms.ValidationError("Please select a zip file.")
 
         """
         Python 2.6

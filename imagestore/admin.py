@@ -10,6 +10,27 @@ from forms import AlbumAdminForm, ImageAdminForm, ZipImageAdminForm, InlineImage
 from helpers.string import reverse_slug
 
 
+class FilterUserAdmin(admin.ModelAdmin): 
+    def queryset(self, request): 
+        qs = super(FilterUserAdmin, self).queryset(request) 
+        if request.user.is_superuser:
+            return qs
+        else:
+            return qs.filter(user=request.user)
+
+    def has_change_permission(self, request, obj=None):
+        if not obj:
+            # the changelist itself
+            return True
+
+        if request.user.is_superuser:
+            return True
+        else:
+            return obj.user == request.user
+
+    has_delete_permission = has_change_permission
+
+
 class InlineImageAdmin(AdminInlineImageMixin, admin.TabularInline):
     form = InlineImageForm
     model = AlbumImage
@@ -17,7 +38,7 @@ class InlineImageAdmin(AdminInlineImageMixin, admin.TabularInline):
     extra = 0
 
 
-class AlbumAdmin(admin.ModelAdmin):
+class AlbumAdmin(FilterUserAdmin):
     form = AlbumAdminForm
     fields = ('name', 'user', 'is_public', 'order')
     list_display = ('name', 'owner', 'admin_thumbnail', 'image_count', 'is_public', 'order')
@@ -34,7 +55,8 @@ class AlbumAdmin(admin.ModelAdmin):
         return obj.user.get_full_name()
 
     def queryset(self, request):
-        return Album.objects.annotate(image_count=Count('images'))
+        qs = super(AlbumAdmin, self).queryset(request) 
+        return qs.annotate(image_count=Count('images'))
 
     def image_count(self, inst):
         return inst.image_count
@@ -43,7 +65,7 @@ class AlbumAdmin(admin.ModelAdmin):
 admin.site.register(Album, AlbumAdmin)
 
 
-class ImageAdmin(admin.ModelAdmin):
+class ImageAdmin(FilterUserAdmin):
     form = ImageAdminForm
     fieldsets = ((None, {'fields': ['mediafile', 'image', 'title', 'description', 'user', 'tags']}),)
     list_display = ('admin_thumbnail', 'title', 'user')

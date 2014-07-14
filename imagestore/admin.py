@@ -1,5 +1,5 @@
-from django.contrib import admin
 from django.conf import settings
+from django.contrib import admin
 from django.core.urlresolvers import reverse
 from django.db.models import Count
 from django.http import HttpResponseRedirect
@@ -47,7 +47,6 @@ class AlbumAdmin(FilterUserAdmin):
     inlines = [InlineImageAdmin]
 
     class Media:
-        from django.conf import settings
         static_url = getattr(settings, 'STATIC_URL', '/static/')
         js = [static_url + 'imagestore/admin/js/change-album.js',]
 
@@ -87,6 +86,10 @@ class ImageAdmin(FilterUserAdmin):
 class AlbumUploadAdmin(admin.ModelAdmin):
     form = ZipImageAdminForm
     fields = ('zip_file', ('new_album_name', 'user'), 'album', 'tags')
+
+    class Media:
+        static_url = getattr(settings, 'STATIC_URL', '/static/')
+        js = [static_url + 'imagestore/admin/js/add-albumupload.js',]
 
     def has_change_permission(self, request, obj=None):
         return False

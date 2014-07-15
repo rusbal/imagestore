@@ -95,17 +95,16 @@ class InlineImageForm(forms.ModelForm):
 
     def clean_image(self):
         data = self.cleaned_data
-        post = get_request().POST
-        print data
-        print post
-
-        raise forms.ValidationError("Test error only.")
-
+        post = get_request().POST 
+        if int(post['user']) != data['image'].user.pk: 
+            raise forms.ValidationError(_("Please select an image that belongs to Album Owner.")) 
         return data['image']
 
 
 class AlbumAdminForm(forms.ModelForm):
-    user = forms.ModelChoiceField(queryset=None, widget=ReadOnlyValueWidget(), label=_('Owner')) 
+    user = forms.ModelChoiceField(queryset=User.objects.filter(is_active=True).all(),
+                                  widget=ReadOnlyValueWidget(),
+                                  label=_('Owner')) 
     name = forms.CharField()
     is_public = forms.BooleanField()
 

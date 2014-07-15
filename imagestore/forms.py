@@ -78,24 +78,10 @@ class InlineImageForm(forms.ModelForm):
         qi = Image.objects.all()
         owner = get_request().user
         if not owner.is_superuser:
-            qi = qi.filter(user=owner)
-
-        img = [(u'',u'----------')]
-        img.extend([(i.pk, i.__unicode__()) for i in qi])
-        self.fields['image'].choices = img
+            qi = qi.filter(user=owner) 
+        self.fields['image'].choices = [(u'',u'----------')] + [(img.pk, img.__unicode__()) for img in qi]
 
 
-# class AlbumForm(forms.ModelForm):
-#     class Meta(object):
-#         model = Album
-#         exclude = ('user', 'created', 'updated')
-#
-#     def __init__(self, *args, **kwargs):
-#         super(AlbumForm, self).__init__(*args, **kwargs)
-#         if 'instance' in kwargs and kwargs['instance']:
-#             self.fields['head'].queryset = Image.objects.filter(album=kwargs['instance'])
-#         else:
-#             self.fields['head'].widget = forms.HiddenInput() 
 class AlbumAdminForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(AlbumAdminForm, self).__init__(*args, **kwargs)
@@ -107,20 +93,22 @@ class AlbumAdminForm(forms.ModelForm):
         self.fields['user'] = UserChoiceField(queryset=qu)
 
 
-# class ImageForm(forms.ModelForm):
-#     class Meta(object):
-#         model = Image
-#         exclude = ('user', 'order')
-#
-#     description = forms.CharField(widget=forms.Textarea(attrs={'rows': 2, 'cols': 19}), required=False,
-#                                   label=_('Description'))
-#
-#     def __init__(self, user, *args, **kwargs):
-#         super(ImageForm, self).__init__(*args, **kwargs)
-#         self.fields['album'].queryset = Album.objects.filter(user=user)
-#         self.fields['album'].required = True
-#         if AUTOCOMPLETE_LIGHT_INSTALLED:
-#             self.fields['tags'].widget = autocomplete_light.TextWidget('TagAutocomplete')
+"""
+Used in views.py
+""" 
+class AlbumForm(forms.ModelForm):
+    class Meta(object):
+        model = Album
+        exclude = ('user', 'created', 'updated')
+
+    def __init__(self, *args, **kwargs):
+        super(AlbumForm, self).__init__(*args, **kwargs)
+        if 'instance' in kwargs and kwargs['instance']:
+            self.fields['head'].queryset = Image.objects.filter(album=kwargs['instance'])
+        else:
+            self.fields['head'].widget = forms.HiddenInput() 
+
+
 class ImageAdminForm(forms.ModelForm):
     mediafile = forms.ModelChoiceField(queryset=Image.objects.all(),
                                        widget=MediaFileWidget(attrs={'class': 'image-fk'}),
@@ -143,6 +131,25 @@ class ImageAdminForm(forms.ModelForm):
         self.fields['user'].required = False
 
         self.fields['mediafile'].initial = self.instance.pk
+
+
+"""
+Used in views.py
+""" 
+class ImageForm(forms.ModelForm):
+    class Meta(object):
+        model = Image
+        exclude = ('user', 'order')
+
+    description = forms.CharField(widget=forms.Textarea(attrs={'rows': 2, 'cols': 19}), required=False,
+                                  label=_('Description'))
+
+    def __init__(self, user, *args, **kwargs):
+        super(ImageForm, self).__init__(*args, **kwargs)
+        self.fields['album'].queryset = Album.objects.filter(user=user)
+        self.fields['album'].required = True
+        if AUTOCOMPLETE_LIGHT_INSTALLED:
+            self.fields['tags'].widget = autocomplete_light.TextWidget('TagAutocomplete')
 
 
 class ZipImageAdminForm(forms.ModelForm):

@@ -27,35 +27,6 @@ class UserChoiceField(forms.ModelChoiceField):
         return obj.get_full_name() or obj.username
 
 
-class ImageForm(forms.ModelForm):
-    class Meta(object):
-        model = Image
-        exclude = ('user', 'order')
-
-    description = forms.CharField(widget=forms.Textarea(attrs={'rows': 2, 'cols': 19}), required=False,
-                                  label=_('Description'))
-
-    def __init__(self, user, *args, **kwargs):
-        super(ImageForm, self).__init__(*args, **kwargs)
-        self.fields['album'].queryset = Album.objects.filter(user=user)
-        self.fields['album'].required = True
-        if AUTOCOMPLETE_LIGHT_INSTALLED:
-            self.fields['tags'].widget = autocomplete_light.TextWidget('TagAutocomplete')
-
-
-class AlbumForm(forms.ModelForm):
-    class Meta(object):
-        model = Album
-        exclude = ('user', 'created', 'updated')
-
-    def __init__(self, *args, **kwargs):
-        super(AlbumForm, self).__init__(*args, **kwargs)
-        if 'instance' in kwargs and kwargs['instance']:
-            self.fields['head'].queryset = Image.objects.filter(album=kwargs['instance'])
-        else:
-            self.fields['head'].widget = forms.HiddenInput()
-
-
 class AlbumOwnerChoiceField(forms.ModelChoiceField):
     def label_from_instance(self, obj):
         return obj.name_with_owner()
@@ -65,34 +36,20 @@ class AlbumOwnerMultipleChoiceField(forms.ModelMultipleChoiceField):
     def label_from_instance(self, obj):
         return obj.name_with_owner()
 
+
 class MediaFileWidget(forms.TextInput):
     """
     COPIED FROM FeinCMS code
     TextInput widget, shows a link to the current value if there is one.
-    """
-
-    def render(self, name, value, attrs=None):
-
+    """ 
+    def render(self, name, value, attrs=None): 
         inputfield = super(MediaFileWidget, self).render(name, value, attrs)
         if value:
             try:
                 mf = Image.objects.get(pk=value)
             except Image.DoesNotExist:
-                return inputfield
-
-            # caption = mf.title
-            # image = mf.admin_thumbnail_path()
-            # image = u'background: url(%(url)s) center center no-repeat;' % {'url': image}
-            # return mark_safe(u"""
-            #     <div style="%(image)s" class="admin-gallery-image-bg absolute">
-            #     <p class="admin-gallery-image-caption absolute">%(caption)s</p>
-            #     %(inputfield)s</div>""" % {
-            #         'image': image,
-            #         'caption': caption,
-            #         'inputfield': inputfield})
-
-            return mark_safe(mf.admin_thumbnail())
-
+                return inputfield 
+            return mark_safe(mf.admin_thumbnail()) 
         return inputfield
 
 
@@ -128,6 +85,42 @@ class InlineImageForm(forms.ModelForm):
         self.fields['image'].choices = img
 
 
+# class AlbumForm(forms.ModelForm):
+#     class Meta(object):
+#         model = Album
+#         exclude = ('user', 'created', 'updated')
+#
+#     def __init__(self, *args, **kwargs):
+#         super(AlbumForm, self).__init__(*args, **kwargs)
+#         if 'instance' in kwargs and kwargs['instance']:
+#             self.fields['head'].queryset = Image.objects.filter(album=kwargs['instance'])
+#         else:
+#             self.fields['head'].widget = forms.HiddenInput() 
+class AlbumAdminForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(AlbumAdminForm, self).__init__(*args, **kwargs)
+
+        qu = User.objects.filter(is_active=True)
+        owner = get_request().user
+        if not owner.is_superuser:
+            qu = qu.filter(pk=owner.pk)
+        self.fields['user'] = UserChoiceField(queryset=qu)
+
+
+# class ImageForm(forms.ModelForm):
+#     class Meta(object):
+#         model = Image
+#         exclude = ('user', 'order')
+#
+#     description = forms.CharField(widget=forms.Textarea(attrs={'rows': 2, 'cols': 19}), required=False,
+#                                   label=_('Description'))
+#
+#     def __init__(self, user, *args, **kwargs):
+#         super(ImageForm, self).__init__(*args, **kwargs)
+#         self.fields['album'].queryset = Album.objects.filter(user=user)
+#         self.fields['album'].required = True
+#         if AUTOCOMPLETE_LIGHT_INSTALLED:
+#             self.fields['tags'].widget = autocomplete_light.TextWidget('TagAutocomplete')
 class ImageAdminForm(forms.ModelForm):
     mediafile = forms.ModelChoiceField(queryset=Image.objects.all(),
                                        widget=MediaFileWidget(attrs={'class': 'image-fk'}),
@@ -204,14 +197,3 @@ class ZipImageAdminForm(forms.ModelForm):
                     raise forms.ValidationError("Please select owner.") 
         
         return data
-
-
-class AlbumAdminForm(forms.ModelForm):
-    def __init__(self, *args, **kwargs):
-        super(AlbumAdminForm, self).__init__(*args, **kwargs)
-
-        qu = User.objects.filter(is_active=True)
-        owner = get_request().user
-        if not owner.is_superuser:
-            qu = qu.filter(pk=owner.pk)
-        self.fields['user'] = UserChoiceField(queryset=qu)

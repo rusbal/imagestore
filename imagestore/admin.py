@@ -50,6 +50,12 @@ class AlbumAdmin(FilterUserAdmin):
         static_url = getattr(settings, 'STATIC_URL', '/static/')
         js = [static_url + 'imagestore/admin/js/change-album.js',]
 
+    def get_readonly_fields(self, request, obj=None):
+        if obj:
+            return ['user',]
+        else:
+            return []
+
     def owner(self, obj):
         return obj.user.get_full_name()
 

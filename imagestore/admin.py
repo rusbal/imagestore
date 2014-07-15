@@ -40,7 +40,7 @@ class InlineImageAdmin(AdminInlineImageMixin, admin.TabularInline):
 
 class AlbumAdmin(FilterUserAdmin):
     form = AlbumAdminForm
-    fields = ('name', 'user', 'is_public', 'order')
+    fields = ('name', 'user', 'is_public')
     list_display = ('name', 'owner', 'admin_thumbnail', 'image_count', 'is_public', 'order')
     list_editable = ('order', 'is_public')
     list_filter = ('user', 'is_public')
@@ -49,12 +49,6 @@ class AlbumAdmin(FilterUserAdmin):
     class Media:
         static_url = getattr(settings, 'STATIC_URL', '/static/')
         js = [static_url + 'imagestore/admin/js/change-album.js',]
-
-    def get_readonly_fields(self, request, obj=None):
-        if obj:
-            return ['user',]
-        else:
-            return []
 
     def owner(self, obj):
         return obj.user.get_full_name()

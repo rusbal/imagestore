@@ -37,6 +37,18 @@ class AlbumOwnerMultipleChoiceField(forms.ModelMultipleChoiceField):
         return obj.name_with_owner()
 
 
+class ReadOnlyValueWidget(forms.TextInput):
+    def render(self, name, value, attrs=None): 
+        inputfield = super(ReadOnlyValueWidget, self).render(name, value, attrs)
+        if value:
+            try:
+                user = User.objects.get(pk=value)
+            except User.DoesNotExist:
+                return inputfield 
+            return mark_safe(user.get_full_name() + "<input type='hidden' name='user' value='{0}'>".format(value)) 
+        return inputfield
+
+
 class MediaFileWidget(forms.TextInput):
     """
     COPIED FROM FeinCMS code
@@ -81,16 +93,35 @@ class InlineImageForm(forms.ModelForm):
             qi = qi.filter(user=owner) 
         self.fields['image'].choices = [(u'',u'----------')] + [(img.pk, img.__unicode__()) for img in qi]
 
+    def clean_image(self):
+        data = self.cleaned_data
+        post = get_request().POST
+        print data
+        print post
+
+        raise forms.ValidationError("Test error only.")
+
+        return data['image']
+
 
 class AlbumAdminForm(forms.ModelForm):
+    user = forms.ModelChoiceField(queryset=None, widget=ReadOnlyValueWidget(), label=_('Owner')) 
+    name = forms.CharField()
+    is_public = forms.BooleanField()
+
     def __init__(self, *args, **kwargs):
         super(AlbumAdminForm, self).__init__(*args, **kwargs)
 
-        qu = User.objects.filter(is_active=True)
-        owner = get_request().user
-        if not owner.is_superuser:
-            qu = qu.filter(pk=owner.pk)
-        self.fields['user'] = UserChoiceField(queryset=qu)
+        if not 'instance' in  kwargs:
+            """
+            Adding a new Album
+            """
+            qu = User.objects.filter(is_active=True)
+            owner = get_request().user
+            if not owner.is_superuser:
+                qu = qu.filter(pk=owner.pk)
+            self.fields['user'] = UserChoiceField(queryset=qu) 
+            self.fields['user'].label = _('Owner')
 
 
 """

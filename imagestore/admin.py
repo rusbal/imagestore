@@ -69,7 +69,7 @@ class ImageAdmin(FilterUserAdmin):
     fieldsets = ((None, {'fields': ['mediafile', 'image', 'title', 'description', 'user', 'tags']}),)
     list_display = ('admin_thumbnail', 'title', 'user')
     list_filter = ('user', 'albums', )
-    list_editable = ('title', 'user', )
+    list_editable = ('title', )
 
     class Media:
         static_url = getattr(settings, 'STATIC_URL', '/static/')

@@ -106,7 +106,7 @@ class AlbumAdminForm(forms.ModelForm):
                                   widget=ReadOnlyValueWidget(),
                                   label=_('Owner')) 
     name = forms.CharField()
-    is_public = forms.BooleanField()
+    is_public = forms.BooleanField(required=False)
 
     def __init__(self, *args, **kwargs):
         super(AlbumAdminForm, self).__init__(*args, **kwargs)

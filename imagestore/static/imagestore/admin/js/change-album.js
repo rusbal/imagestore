@@ -1,9 +1,21 @@
 (function($){$(function(){
     var thumbs;
+    var image_owner = {}
+
     var n = $('select#id_user option').size();
     if (n <= 2) {
         $('select#id_user option:last').attr('selected', 'selected');
     }
+
+    /**
+     * Load Image to Owner
+     */
+    $.get('/gallery/img2owner/', function(result){
+        if (result.success) {
+            image_owner = result.image_owner;
+            console.log(image_owner);
+        }
+    }, 'json');
 
     /**
      * Load imagestore thumbnails
@@ -67,10 +79,28 @@
         }
     });
 
-    $('tr.add-row a').click(function(){
+    $('tr.add-row a').click(function(){ 
+        var id_user = $('#id_user').val();
+        if (id_user === "") {
+            alert("Please select album owner first.");
+            $('#id_user').focus();
+            $('a.inline-deletelink').parents('tr').remove();
+            return;
+        }
+
+        $('tr.dynamic-albumimage_set td.field-image select option').each(function(index){
+            if (this.value !== "" && image_owner[this.value] != id_user) {
+                $(this).remove();
+            }
+        });
+
         /**
          * Hide input
          */
         $('tr.dynamic-albumimage_set').last().children('.field-mediafile').empty();
+    });
+
+    $('#id_user').change(function(){
+        $('a.inline-deletelink').parents('tr').remove();
     });
 });})(django.jQuery);

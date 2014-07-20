@@ -200,6 +200,7 @@ class ZipImageAdminForm(forms.ModelForm):
 
         self.fields['user'] = UserChoiceField(queryset=qu)
         self.fields['user'].required = False
+        self.fields['user'].label = _('Owner')
 
     def clean_zip_file(self):
         data = self.cleaned_data

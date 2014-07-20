@@ -70,6 +70,7 @@ def process_zipfile(uploaded_album):
                     img.image.save(filename, ContentFile(data))
                     img.user = uploaded_album.album.user
                     img.title = reverse_slug(filename, remove_extension=True, title=True)
+                    img.tags = uploaded_album.tags
                     img.save()
 
                     AlbumImage.objects.create(album=uploaded_album.album,

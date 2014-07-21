@@ -13,7 +13,6 @@
     $.get('/gallery/img2owner/', function(result){
         if (result.success) {
             image_owner = result.image_owner;
-            console.log(image_owner);
         }
     }, 'json');
 

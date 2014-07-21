@@ -45,7 +45,7 @@ class ReadOnlyValueWidget(forms.TextInput):
                 user = User.objects.get(pk=value)
             except User.DoesNotExist:
                 return inputfield 
-            return mark_safe(user.get_full_name() + "<input type='hidden' name='user' value='{0}'>".format(value)) 
+            return mark_safe(user.get_full_name() + "<input type='hidden' id='id_user' name='user' value='{0}'>".format(value)) 
         return inputfield
 
 
